@@ -1,18 +1,32 @@
 package ui;
 
-import antiprimes.AntiPrimesSequence;
-import antiprimes.Number;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+
+import antiprimes.AntiPrimesSequence;
+import antiprimes.Number;
 
 
 /**
  * The application window.
  */
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements Observer{
 
     private AntiPrimesSequence sequence;
     private DefaultListModel display = new DefaultListModel();
@@ -23,6 +37,9 @@ public class MainWindow extends JFrame {
      * Build a window tied to the given sequence of antinumbers.
      */
     public MainWindow(AntiPrimesSequence sequence) {
+    	//La finestra si setta come osservatore della sequenza
+    	sequence.addObserver(this);
+    	
         this.sequence = sequence;
         setTitle("Antiprimes");
 
@@ -35,7 +52,7 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 sequence.computeNext();
-                updateDisplay();
+                //updateDisplay();
             }
         });
 
@@ -43,7 +60,7 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 sequence.reset();
-                updateDisplay();
+                //updateDisplay();
             }
         });
 
@@ -70,7 +87,22 @@ public class MainWindow extends JFrame {
      */
     private void updateDisplay() {
         display.clear();
-        for (Number n : sequence.getLastK(SHOW_LAST))
+        List<Number> lista = sequence.getLastK(SHOW_LAST);
+        for (Number n : lista)
             display.add(0, "" + n.getValue() + " (" + n.getDivisors() + ")");
     }
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		System.out.println("Finestra risvegliata");
+	  	MainWindow window = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	window.updateDisplay();	
+                window.setVisible(true);
+            }
+        });
+	}
+
 }
